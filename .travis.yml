@@ -1,0 +1,16 @@
+sudo: required
+
+services:
+  - docker
+
+env:
+  global:
+  - IMAGE=xorcio/xray:$TRAVIS_COMMIT
+
+before_install:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker build -t $IMAGE .
+  - docker push $IMAGE
+
+script:
+  - docker-compose run re lein test

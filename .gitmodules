@@ -1,0 +1,6 @@
+[submodule "re/events"]
+	path = re/events
+	url = git@github.com:xray-tech/xorc-events.git
+[submodule "events"]
+	path = events
+	url = https://github.com/xray-tech/xorc-events.git

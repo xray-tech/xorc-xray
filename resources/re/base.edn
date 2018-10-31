@@ -1,0 +1,98 @@
+{:duct.core/project-ns  re
+
+ :duct.module.web/api  {}
+ :duct.module/ataraxy {""
+                       ^:tracing {"/health" [:health]
+                                  "/metrics" [:metrics]
+                                  "/run" [:run]}}
+ :re.handler/health {}
+ :re.handler/metrics {:registry #ig/ref :re/metrics}
+ :re.handler/run {:pipeline [#ig/ref :re.stage/effects
+                             #ig/ref :re.stage.oam/compile-program
+                             #ig/ref :re.stage.oam/run
+                             #ig/ref :re.stage/coeffects
+                             #ig/ref :re.stage/persistence]}
+
+ :re.middleware/tracing {}
+
+ :re.boundary/states {:db #ig/ref :re/db}
+ :re.boundary/programs {:db #ig/ref :re/db}
+
+ :re.oam/compiler {}
+
+ :duct.module/logging {}
+
+ :re/metrics {}
+ :re/tracing {:metrics #ig/ref :re/metrics
+              :metric-tags {"benchmark_thinking" ["philosopher"]
+                            "benchmark_doit" ["philosopher" "done"]
+                            "benchmark_died" ["philosopher"]}
+              :metric-summaries {"benchmark_rwait" "wait_lag"}}
+ :re.metrics/jetty {:registry #ig/ref :re/metrics}
+
+ :re/encoder {:classes ["events.SdkEvent$SDKEvent"
+                        "xray.events.Timer$TimerCreate"
+                        "xray.events.Timer$TimerCancel"
+                        "xray.events.Timer$TimerExpired"
+                        "http.HttpRequestOuterClass$HttpRequest"
+                        "http.HttpResponseOuterClass$HttpResponse"
+                        "common.Rpc$DynamicResponse"]}
+ :re/decoder {:classes ["events.SdkEvent$SDKEvent"
+                        "xray.events.Timer$TimerCreate"
+                        "xray.events.Timer$TimerCancel"
+                        "xray.events.Timer$TimerExpired"
+                        "http.HttpRequestOuterClass$HttpRequest"
+                        "http.HttpResponseOuterClass$HttpResponse"
+                        "common.Rpc$DynamicResponse"]}
+
+ :re.effects/kafka #ig/ref :re/kafka-producer
+ :re.effects/db #ig/ref :re/db
+
+ [:group/timer :re/rpc] {:topic "rpc.timer"
+                         :encoder #ig/ref :re/encoder}
+
+ [:group/http :re/rpc] {:topic "rpc.http"
+                        :encoder #ig/ref :re/encoder}
+
+ [:group/output :re/rpc] {:topic "rpc.responses"
+                          :encoder #ig/ref :re/encoder}
+
+ :re/oam {:coeffects [#ig/ref :re.sync-coeffects/now
+                      #ig/ref :re.sync-coeffects/println
+                      #ig/ref :re.sync-coeffects/random
+                      #ig/ref :re.sync-coeffects/clock
+                      #ig/ref :re.sync-coeffects/trace
+                      #ig/ref :re.sync-coeffects/ref-deref
+                      #ig/ref :re.sync-coeffects/ref-write
+                      #ig/ref :re.sync-coeffects/ref-register]}
+
+ ;; STAGES
+ :re.stage/effects {:handlers {:kafka #ig/ref :re.effects/kafka
+                               :db #ig/ref :re.effects/db}}
+ :re.stage.oam/compile-program {:programs #ig/ref :re.boundary/programs
+                             :compiler #ig/ref :re.oam/compiler}
+ :re.stage/persistence {}
+ :re.stage/rpc {:states #ig/ref :re.boundary/states
+                :programs #ig/ref :re.boundary/programs}
+ :re.stage/coeffects {:handlers [#ig/ref :re.coeffect/timer-service
+                                 #ig/ref :re.coeffect/http
+                                 #ig/ref :re.coeffect/dummy]}
+ :re.stage/decoder {:decoder #ig/ref :re/decoder}
+ :re.stage.oam/run {:oam #ig/ref :re/oam}
+ :re.stage.oam/unblock {:oam #ig/ref :re/oam}
+ :re.stage.rpc/route {:rpc #ig/ref [:group/output :re/rpc]}
+
+ ;; SYNC COEFFECTS
+ :re.sync-coeffects/now {}
+ :re.sync-coeffects/println {}
+ :re.sync-coeffects/random {}
+ :re.sync-coeffects/clock {}
+ :re.sync-coeffects/trace {}
+ :re.sync-coeffects/ref-write {}
+ :re.sync-coeffects/ref-deref {}
+ :re.sync-coeffects/ref-register {}
+
+ ;; ASYNC COEFFECTS
+ :re.coeffect/timer-service {:rpc #ig/ref [:group/timer :re/rpc]}
+ :re.coeffect/http {:rpc #ig/ref [:group/http :re/rpc]}
+ :re.coeffect/dummy {}}

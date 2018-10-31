@@ -1,0 +1,1 @@
+`re.entity`().device.os

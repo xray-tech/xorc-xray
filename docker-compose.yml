@@ -1,0 +1,41 @@
+version: '3'
+services:
+  re:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4011:4011"
+      - "4012:80"
+    links:
+      - zookeeper
+      - kafka
+      - scylladb
+      - jaeger
+    volumes:
+      - .:/usr/app
+      - ~/.m2:/root/.m2
+      - ~/.lein:/root/.lein
+    command: lein run
+  scylladb:
+    image: scylladb/scylla:2.1.6
+  zookeeper:
+    image: confluentinc/cp-zookeeper:4.1.1-2
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_TICK_TIME: 2000
+  kafka:
+    image: confluentinc/cp-kafka:4.1.1-2
+    restart: on-failure
+    links:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:32181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 60000
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"

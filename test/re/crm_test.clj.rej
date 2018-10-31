@@ -1,0 +1,12 @@
+diff a/re/test/re/crm_test.clj b/re/test/re/crm_test.clj	(rejected hunks)
+@@ -19,7 +19,9 @@
+             :entities (ig/ref :re.boundary/entities)
+             :programs (ig/ref :re.boundary/programs)
+             :states (ig/ref :re.boundary/states)}
+-   :re/oam {:next (ig/ref :re.stage/coeffects)}
++   :re/oam {:next (ig/ref :re.stage/coeffects)
++            :ffc {"re.entity" :re.crm/get-current-entity}}
++   :re.crm/get-current-entity {}
+    ;; the order is important here. we handle coeffects first and then save
+    ;; state. In case of a crash in between, we'll handle coeffects second time
+    ;; and this is desired (currently) behavior

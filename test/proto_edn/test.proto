@@ -1,0 +1,31 @@
+syntax = "proto2";
+
+package protoedn.testing;
+
+message User {
+  oneof id {
+    string name = 1;
+    string login = 2;
+  }
+  required int32 age = 3;
+  repeated string hobby = 4;
+
+  map <string, string> tags = 5;
+
+  enum Sex {
+    male = 0;
+    female = 1;
+    other = 2;
+  }
+
+  optional Sex sex = 6;
+
+  message Child {
+    required string name = 1;
+  }
+
+  repeated Child children = 7;
+
+  required bytes avatar = 8;
+
+}

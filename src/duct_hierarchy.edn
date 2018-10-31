@@ -1,0 +1,4 @@
+{:re/kafka-consumer [:duct/daemon]
+ :re/metrics [:re/init]
+ :re.service/timeout [:duct/daemon]
+ :re/test-db [:re/db]}

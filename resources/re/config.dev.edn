@@ -1,0 +1,42 @@
+{:duct.core/environment :development
+
+ :duct.core/include ["re/base"]
+
+ [:group/rpc :re/kafka-consumer] {:topics ["rpc.responses"]
+                                  :configs {"bootstrap.servers" ["kafka:9092"]
+                                            "group.id" "kafka-consumer-dev"}
+                                  :count 1
+                                  :pipeline [#ig/ref :re.stage/effects
+                                             #ig/ref :re.stage/decoder
+                                             #ig/ref :re.stage/rpc
+                                             #ig/ref :re.stage.oam/unblock
+                                             #ig/ref :re.stage/coeffects
+                                             #ig/ref :re.stage/persistence]}
+
+ :re/kafka-producer {:configs {"bootstrap.servers" ["kafka:9092"]}}
+
+ :re/db {:cluster {:contact-points ["scylladb"]}
+         :keyspace "re_dev"
+         :tracer #ig/ref :re/tracing}
+
+ :re.service/timeout {:encoder #ig/ref :re/encoder
+                      :decoder #ig/ref :re/decoder
+                      :config {:streams-config {"bootstrap.servers" ["kafka:9092"]
+                                                "application.id" "timeout-service"
+                                                "state.dir" "/tmp/kafka-streams"}
+                               :input-topic "rpc.timer"
+                               :output-topic "rpc.responses"
+                               :timers-store-name "timers"
+                               :correlations-store-name "correlations"}}
+
+ ;; ;; HTTP
+ [:group/http :re/kafka-consumer] {:topics ["rpc.http"]
+                                   :configs {"bootstrap.servers" ["kafka:9092"]
+                                             "group.id" "kafka-consumer-dev"}
+                                   :count 1
+                                   :pipeline [#ig/ref :re.stage/decoder
+                                              #ig/ref :re.service/http]}
+ :re.service/http {:rpc #ig/ref [:group/output :re/rpc]}
+
+ :duct.server.http/jetty {:port 80
+                          :configurator #ig/ref :re.metrics/jetty}}

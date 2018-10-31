@@ -1,0 +1,15 @@
+{:pipelines {:basic [:re.stage/effects
+                     :re.stage.oam/compile-program
+                     :re.stage.oam/run
+                     :re.stage/coeffects
+                     :re.stage/persistence]}}
+
+^{:name "Now time"}
+[[:increment-time 100]
+ [:execute :basic {:core/code "Coeffect({. name = \"now\" .})"}]
+ [:check-new-values #{100}]]
+
+^{:name "ExternalRef"}
+[[:execute :basic {:core/code #re.player/resource "sync_coeffects_external_ref.orc"
+                   :core/state-id #uuid "ce1691fa-69da-4a8b-8292-d9e94056c314"}]
+ [:check-states-meta #uuid "ce1691fa-69da-4a8b-8292-d9e94056c314" {:core/refs {"fqcap" 10}}]]
