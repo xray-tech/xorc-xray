@@ -64,7 +64,7 @@ All computations are executed inside kafka-consumer thread pool. This is simple 
 git clone https://github.com/xray-tech/xorc-xray.git --recursive
 ```
 
-- Setup docker authentication as described in the [Infra README](../infra/README.md)
+- Setup docker authentication as described in the [Infra README](https://github.com/xray-tech/xorc-infra/blob/master/README.md)
 
 ## Testing
 
